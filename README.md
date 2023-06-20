@@ -38,10 +38,50 @@ The WP pin, pin 7, is the Write-Protect pin. This pin can enable or disable the 
 The address pins, A0, A1, and A2, which are pins 1, 2, and 3 are all connected to ground. Since they are all grounded, they are all in LOW states. Therefore, the address pins will have a value of 000.The SDA pin, pin 5, of the EEPROM connects to analog pin 4 on the arduino, which is the SDA terminal of the arduino. This is connected via a 10KΩ pull-up resistor.The SCL pin, pin 6, of the EEPROM connects to analog pin 5 on the arduino, which is the SCL terminal of the arduino. This establishes a clock line so that the master and slave device can work in synchrony.The last pin, the WP (or Write Protect) pin connects to ground. Since we want to write to a device in this circuit, we just permanently connect it to ground. In this circuit, we're not interested in disabling the write feature. However, there are times where it may be very necessary. For example, if you've permanently already written your program to EEPROM and you don't want any modifications at all, just the ability to read from the EEPROM, you can disconnect the write feature by permanently tying the WP pin to VCC. Or you can connect it to a digital pin of a micrcontroller, so that you can switch between enabling or disabling it.
 
 ## PROGRAM:
+#include "Wire.h"
+#define EEPROM_I2C_ADDRESS 0x50
+void setup()
+{
+Wire.begin();
+Serial.begin(9600);
+int address = 0;
+byte val = 120;
+writeAddress(address, val);
+byte readVal = readAddress(address);
+Serial.print("The returned value is ");
+Serial.println(readVal);
+}
+void loop()
+{
+
+}
+void writeAddress(int address, byte val)
+{
+Wire.beginTransmission(EEPROM_I2C_ADDRESS);
+Wire.write((int)(address >> 8)); // MSB
+Wire.write((int)(address & 0xFF)); // LSB
+Wire.write(val);
+Wire.endTransmission();
+delay(5);
+}
+byte readAddress(int address)
+{
+byte rData = 0xFF;
+Wire.beginTransmission(EEPROM_I2C_ADDRESS);
+Wire.write((int)(address >> 8)); // MSB
+Wire.write((int)(address & 0xFF)); // LSB
+Wire.endTransmission();
+Wire.requestFrom(EEPROM_I2C_ADDRESS, 1);
+rData = Wire.read();
+return rData;
+}
 
 ## CIRCUIT DIAGRAM:
+![WhatsApp Image 2023-06-20 at 11 21 36 AM](https://github.com/amarnath192001/EEPROM-interfacing/assets/103507677/f7f5d7f5-9bf3-4e37-a67c-e16886fb0d12)
+
 
 ## OUTPUT:
+![WhatsApp Image 2023-06-20 at 11 21 36 AM](https://github.com/amarnath192001/EEPROM-interfacing/assets/103507677/9da4e2e2-3773-4dc6-818a-adffe676f87b)
 
 ## RESULT:
 
